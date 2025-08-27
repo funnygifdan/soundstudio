@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Podcast Studio</title>
+<style>
+ body {
+   margin: 0;
+   background: url('studio.jpg') no-repeat center center fixed;
+   background-size: cover;
+   height: 100vh;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+ }
+ .studio {
+   position: relative;
+   width: 1000px;
+   height: 600px;
+ }
+
+ /* Monitor screen */
+ .monitor {
+   position: absolute;
+   top: 100px; left: 360px;
+   width: 280px; height: 180px;
+   background: black;
+   border: 3px solid #00ff00;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   color: #00ff00;
+   font-family: monospace;
+   font-size: 18px;
+   overflow: hidden;
+ }
+ .hidden { display: none; }
+
+ /* Loading text animation */
+ @keyframes blink { 50% { opacity: 0; } }
+ .loading { animation: blink 1s infinite; }
+
+ /* Tape reels */
+ .reel {
+   position: absolute;
+   top: 150px;
+   width: 90px; height: 90px;
+   border-radius: 50%;
+   border: 4px solid #ccc;
+   background: radial-gradient(#999, #333);
+   animation: spin 3s linear infinite;
+   animation-play-state: paused;
+ }
+ .reel.left { left: 180px; }
+ .reel.right { left: 280px; }
+
+ @keyframes spin { 100% { transform: rotate(360deg); } }
+
+ /* Start button */
+ .start-btn {
+   position: absolute;
+   bottom: 40px; left: 200px;
+   padding: 8px 16px;
+   background: #111;
+   border: 2px solid #00ff00;
+   color: #00ff00;
+   cursor: pointer;
+   font-family: monospace;
+   box-shadow: 0 0 10px #00ff00;
+ }
+</style>
+</head>
+<body>
+<div class="studio">
+  <!-- Monitor -->
+  <div id="monitor" class="monitor">
+    <span class="loading">Booting...</span>
+  </div>
+
+  <!-- Tape reels -->
+  <div id="reelL" class="reel left"></div>
+  <div id="reelR" class="reel right"></div>
+
+  <!-- Start button -->
+  <button id="startBtn" class="start-btn">▶ START</button>
+</div>
+
+<script>
+ const monitor = document.getElementById("monitor");
+ const reelL = document.getElementById("reelL");
+ const reelR = document.getElementById("reelR");
+ const startBtn = document.getElementById("startBtn");
+
+ let booted = false;
+ startBtn.addEventListener("click", () => {
+   if (!booted) {
+     monitor.innerHTML = "<span class='loading'>Loading system...</span>";
+     setTimeout(() => {
+       monitor.innerHTML = `
+         <h3 style="color:#0f0">Podcast Menu</h3>
+         <iframe src="https://www.podbean.com/player-v2/?i=229yb-183d7db-pb&share=1&size=150" width="100%" height="150" frameborder="0"></iframe>
+       `;
+       booted = true;
+     }, 3000);
+
+     reelL.style.animationPlayState = "running";
+     reelR.style.animationPlayState = "running";
+     startBtn.innerText = "⏹ STOP";
+   } else {
+     monitor.innerHTML = "<span class='loading'>System Off</span>";
+     reelL.style.animationPlayState = "paused";
+     reelR.style.animationPlayState = "paused";
+     startBtn.innerText = "▶ START";
+     booted = false;
+   }
+ });
+</script>
+</body>
+</html>
