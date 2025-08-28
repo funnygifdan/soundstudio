@@ -3,10 +3,20 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 <title>Interactive Podcast Studio</title>
+<meta name="description" content="Record, mix, and share. A hacker-neon podcast studio with clean controls and fast load.">
+<meta property="og:title" content="Interactive Podcast Studio" />
+<meta property="og:description" content="Record, mix, and share. A hacker-neon podcast studio with clean controls and fast load." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://asoundstudio.netlify.app/" />
+<meta property="og:image" content="/og-card.jpg" />
+<link rel="icon" href="/favicon.ico" />
+
 <style>
   :root{
     --accent:#00ff00;
+    --accent-soft:#b8ffb8;
   }
 
   /* Page base */
@@ -66,7 +76,8 @@
     top:78.5%;
     left:49%;
     transform: translate(-50%,-50%);
-    padding:.55rem 1.1rem;
+    padding:.75rem 1.25rem;      /* taller for thumbs */
+    min-height:44px;             /* a11y target size */
     background:#111;
     color:var(--accent);
     border:2px solid var(--accent);
@@ -76,27 +87,50 @@
     box-shadow: 0 0 10px var(--accent);
     border-radius:6px;
     user-select:none;
+    transition: box-shadow .15s ease, transform .08s ease, border-color .15s ease, background .2s ease;
+  }
+  .start-btn:hover{
+    box-shadow: 0 0 12px rgba(0,255,0,.85), 0 0 56px rgba(0,255,0,.35);
+  }
+  .start-btn:focus-visible{
+    outline:2px solid #00ff88;
+    outline-offset:3px;
   }
   .start-btn:active{ transform: translate(-50%,-50%) scale(0.98); }
 
   /* Tiny blink while “booting” */
   @keyframes blink { 50% { opacity: 0; } }
   .loading{ animation: blink 1s infinite; }
+
+  /* Visually hidden utility for screen-reader hints */
+  .visually-hidden{
+    position:absolute !important;
+    width:1px;height:1px;
+    padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    .loading{ animation-duration:0s; }
+    .start-btn{ transition:none; }
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
     <div class="studio">
-      <!-- Background photo (keep this filename in your folder) -->
-      <img class="bg" src="studio.jpg" alt="Podcast studio background">
+      <!-- Background photo (decorative) -->
+      <img class="bg" src="studio.jpg" alt="">
 
       <!-- Monitor overlay -->
-      <div id="monitor" class="monitor">
+      <div id="monitor" class="monitor" role="region" aria-live="polite" aria-atomic="true">
         <span class="loading">Booting...</span>
       </div>
 
       <!-- Start button -->
-      <button id="startBtn" class="start-btn">▶ START</button>
+      <button id="startBtn" class="start-btn" type="button" aria-describedby="startHelp">▶ START</button>
+      <p id="startHelp" class="visually-hidden">Press start to power on the studio monitor.</p>
     </div>
   </div>
 
@@ -114,7 +148,7 @@
               <div style="color:#0f0;font-weight:700;">Podcast Menu</div>
               <iframe
                 src="https://www.podbean.com/player-v2/?i=229yb-183d7db-pb&share=1&size=150"
-                width="100%" height="100%" frameborder="0" allow="autoplay">
+                width="100%" height="100%" frameborder="0" allow="autoplay" title="Podcast player">
               </iframe>
             </div>
           `;
