@@ -1,120 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Interactive Podcast Studio</title>
 <style>
- body {
-   margin: 0;
-   background: url('studio.jpg') no-repeat center center fixed;
-   background-size: cover;
-   height: 100vh;
-   display: flex;
-   justify-content: center;
-   align-items: center;
- }
- .studio {
-   position: relative;
-   width: 1000px;
-   height: 600px;
- }
+  :root{
+    --accent:#00ff00;
+  }
 
- /* Monitor screen */
- .monitor {
-   position: absolute;
-   top: 100px; left: 360px;
-   width: 280px; height: 180px;
-   background: black;
-   border: 3px solid #00ff00;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   color: #00ff00;
-   font-family: monospace;
-   font-size: 18px;
-   overflow: hidden;
- }
- .hidden { display: none; }
+  /* Page base */
+  html,body{
+    margin:0;
+    height:100%;
+    background:#000; /* fallback edges */
+    font-family: "Courier New", monospace;
+    color: var(--accent);
+  }
 
- /* Loading text animation */
- @keyframes blink { 50% { opacity: 0; } }
- .loading { animation: blink 1s infinite; }
+  /* Center the studio and keep it responsive */
+  .wrap{
+    min-height:100dvh;
+    display:grid;
+    place-items:center;
+    padding:12px;
+  }
 
- /* Tape reels */
- .reel {
-   position: absolute;
-   top: 150px;
-   width: 90px; height: 90px;
-   border-radius: 50%;
-   border: 4px solid #ccc;
-   background: radial-gradient(#999, #333);
-   animation: spin 3s linear infinite;
-   animation-play-state: paused;
- }
- .reel.left { left: 180px; }
- .reel.right { left: 280px; }
+  /* The studio scene uses the actual image as a layer so overlays always align */
+  .studio{
+    position:relative;
+    width:min(95vw, 1100px);
+    aspect-ratio: 3 / 2;         /* matches studio.jpg proportions closely */
+    overflow:hidden;
+    border-radius:8px;
+    box-shadow: 0 0 30px rgba(0,255,0,.18);
+  }
+  .studio img.bg{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit: cover;
+  }
 
- @keyframes spin { 100% { transform: rotate(360deg); } }
+  /* Monitor overlay — aligned to the real screen via % so it scales */
+  .monitor{
+    position:absolute;
+    /* tuned by eye to match the photo */
+    top:31%;
+    left:37.2%;
+    width:26.8%;
+    height:21%;
+    background:#000;
+    border:3px solid var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size: clamp(12px, 1.8vw, 18px);
+    overflow:hidden;
+    box-shadow: 0 0 12px rgba(0,255,0,.35);
+  }
 
- /* Start button */
- .start-btn {
-   position: absolute;
-   bottom: 40px; left: 200px;
-   padding: 8px 16px;
-   background: #111;
-   border: 2px solid #00ff00;
-   color: #00ff00;
-   cursor: pointer;
-   font-family: monospace;
-   box-shadow: 0 0 10px #00ff00;
- }
+  /* START button — sits over the keyboard */
+  .start-btn{
+    position:absolute;
+    top:78.5%;
+    left:49%;
+    transform: translate(-50%,-50%);
+    padding:.55rem 1.1rem;
+    background:#111;
+    color:var(--accent);
+    border:2px solid var(--accent);
+    cursor:pointer;
+    font-weight:700;
+    letter-spacing:.02em;
+    box-shadow: 0 0 10px var(--accent);
+    border-radius:6px;
+    user-select:none;
+  }
+  .start-btn:active{ transform: translate(-50%,-50%) scale(0.98); }
+
+  /* Tiny blink while “booting” */
+  @keyframes blink { 50% { opacity: 0; } }
+  .loading{ animation: blink 1s infinite; }
 </style>
 </head>
 <body>
-<div class="studio">
-  <!-- Monitor -->
-  <div id="monitor" class="monitor">
-    <span class="loading">Booting...</span>
+  <div class="wrap">
+    <div class="studio">
+      <!-- Background photo (keep this filename in your folder) -->
+      <img class="bg" src="studio.jpg" alt="Podcast studio background">
+
+      <!-- Monitor overlay -->
+      <div id="monitor" class="monitor">
+        <span class="loading">Booting...</span>
+      </div>
+
+      <!-- Start button -->
+      <button id="startBtn" class="start-btn">▶ START</button>
+    </div>
   </div>
 
-  <!-- Tape reels -->
-  <div id="reelL" class="reel left"></div>
-  <div id="reelR" class="reel right"></div>
+  <script>
+    const monitor = document.getElementById('monitor');
+    const startBtn = document.getElementById('startBtn');
+    let booted = false;
 
-  <!-- Start button -->
-  <button id="startBtn" class="start-btn">▶ START</button>
-</div>
-
-<script>
- const monitor = document.getElementById("monitor");
- const reelL = document.getElementById("reelL");
- const reelR = document.getElementById("reelR");
- const startBtn = document.getElementById("startBtn");
-
- let booted = false;
- startBtn.addEventListener("click", () => {
-   if (!booted) {
-     monitor.innerHTML = "<span class='loading'>Loading system...</span>";
-     setTimeout(() => {
-       monitor.innerHTML = `
-         <h3 style="color:#0f0">Podcast Menu</h3>
-         <iframe src="https://www.podbean.com/player-v2/?i=229yb-183d7db-pb&share=1&size=150" width="100%" height="150" frameborder="0"></iframe>
-       `;
-       booted = true;
-     }, 3000);
-
-     reelL.style.animationPlayState = "running";
-     reelR.style.animationPlayState = "running";
-     startBtn.innerText = "⏹ STOP";
-   } else {
-     monitor.innerHTML = "<span class='loading'>System Off</span>";
-     reelL.style.animationPlayState = "paused";
-     reelR.style.animationPlayState = "paused";
-     startBtn.innerText = "▶ START";
-     booted = false;
-   }
- });
-</script>
+    startBtn.addEventListener('click', () => {
+      if(!booted){
+        monitor.innerHTML = "<span class='loading'>Loading system...</span>";
+        setTimeout(() => {
+          monitor.innerHTML = `
+            <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;">
+              <div style="color:#0f0;font-weight:700;">Podcast Menu</div>
+              <iframe
+                src="https://www.podbean.com/player-v2/?i=229yb-183d7db-pb&share=1&size=150"
+                width="100%" height="100%" frameborder="0" allow="autoplay">
+              </iframe>
+            </div>
+          `;
+          booted = true;
+          startBtn.textContent = "⏹ STOP";
+        }, 1200);
+      } else {
+        monitor.innerHTML = "<span class='loading'>System Off</span>";
+        startBtn.textContent = "▶ START";
+        booted = false;
+      }
+    });
+  </script>
 </body>
 </html>
